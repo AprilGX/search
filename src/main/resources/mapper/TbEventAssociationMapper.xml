@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.search.search.mapper.TbEventAssociationMapper">
+
+    <!-- 查询已存在的事件关联 -->
+    <select id="findExistingAssociations" resultType="java.lang.Integer">
+        SELECT association_id 
+        FROM tb_event_association 
+        WHERE event_id = #{eventId} 
+        AND association_id IN 
+        <foreach collection="paragraphIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

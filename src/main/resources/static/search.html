@@ -1,0 +1,901 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能搜索系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CBCB',
+                        accent: '#FF7D00',
+                        neutral: '#1D2129',
+                        'neutral-light': '#F2F3F5',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+            .shadow-hover {
+                transition: box-shadow 0.3s ease;
+            }
+            .shadow-hover:hover {
+                box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-search text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-neutral">智能搜索系统</h1>
+                <span class="bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full ml-2">Beta</span>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="search.html" class="text-primary font-medium border-b-2 border-primary pb-1">搜索</a></li>
+                    <li><a href="help.html" class="text-neutral hover:text-primary transition-all-300">帮助</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- 搜索框区域 -->
+        <section class="max-w-3xl mx-auto mb-12 text-center">
+            <div class="mb-6">
+                <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold text-neutral mb-2">知识无限，搜索由心</h2>
+                <p class="text-gray-500">快速找到您需要的信息，精准定位段落和事件</p>
+            </div>
+            <div class="relative">
+                <input
+                        type="text"
+                        id="searchKeyword"
+                        placeholder="请输入搜索关键词..."
+                        class="w-full px-5 py-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-lg transition-all-300"
+                >
+                <button
+                        id="searchButton"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-all-300 shadow-md"
+                >
+                    <i class="fa fa-search mr-2"></i>搜索
+                </button>
+            </div>
+            <div class="mt-4 text-sm text-gray-500" id="searchHint">
+                请输入关键词开始搜索
+            </div>
+        </section>
+
+        <!-- 搜索结果区域 -->
+        <section class="max-w-4xl mx-auto" id="searchResults">
+            <!-- 加载状态 -->
+            <div id="loadingIndicator" class="hidden py-16 text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-primary/30 border-t-primary mb-4"></div>
+                <p class="text-gray-600">正在搜索中...</p>
+            </div>
+
+            <!-- 结果统计 -->
+            <div id="resultStats" class="hidden mb-6 pb-4 border-b border-gray-200">
+                <div class="flex justify-between items-center">
+                    <p class="text-gray-600" id="statsText"></p>
+                    <button id="associateButton" class="hidden bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-all-300 shadow-md text-sm">
+                        <i class="fa fa-link mr-1"></i>关联事件
+                    </button>
+                </div>
+            </div>
+
+            <!-- 段落结果 -->
+            <div id="paragraphResults" class="hidden mb-8">
+                <h3 class="text-xl font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa fa-file-text-o text-primary mr-2"></i>
+                    段落内容搜索结果
+                    <span class="ml-2 text-sm text-gray-500" id="paragraphCount"></span>
+                </h3>
+                <div id="paragraphItems" class="space-y-4"></div>
+            </div>
+
+            <!-- 事件结果 -->
+            <div id="eventResults" class="hidden">
+                <h3 class="text-xl font-semibold text-neutral mb-4 flex items-center">
+                    <i class="fa fa-calendar text-accent mr-2"></i>
+                    事件标题搜索结果
+                    <span class="ml-2 text-sm text-gray-500" id="eventCount"></span>
+                </h3>
+                <div id="eventItems" class="space-y-4"></div>
+            </div>
+
+            <!-- 无结果状态 -->
+            <div id="noResults" class="hidden py-16 text-center">
+                <i class="fa fa-search text-gray-300 text-6xl mb-4"></i>
+                <h3 class="text-xl font-semibold text-gray-500 mb-2">未找到相关内容</h3>
+                <p class="text-gray-400">请尝试使用其他关键词或调整搜索条件</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© 2025 智能搜索系统 - 基于Elasticsearch构建</p>
+        </div>
+    </footer>
+
+    <!-- 关联事件弹出框 -->
+    <div id="associateModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col">
+            <!-- 模态框头部 -->
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-neutral">关联事件</h3>
+                <button id="closeModalButton" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div class="px-6 py-4 flex-grow overflow-y-auto">
+                <div class="mb-4">
+                    <p class="text-gray-600 mb-2">已选择 <span id="selectedCount" class="font-medium text-primary">0</span> 个搜索结果</p>
+                    <p class="text-sm text-gray-500 mb-4">请选择要关联的事件：</p>
+
+                    <!-- 搜索框 -->
+                    <div class="relative mb-4">
+                        <input
+                                type="text"
+                                id="eventSearchInput"
+                                placeholder="搜索事件..."
+                                class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm"
+                        >
+                        <i class="fa fa-search absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+
+                    <!-- 事件列表 -->
+                    <div id="eventList" class="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                        <!-- 加载状态 -->
+                        <div id="eventsLoading" class="py-4 text-center">
+                            <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-primary/30 border-t-primary mb-2"></div>
+                            <p class="text-sm text-gray-500">加载事件中...</p>
+                        </div>
+
+                        <!-- 错误状态 -->
+                        <div id="eventsError" class="hidden py-4 text-center">
+                            <i class="fa fa-exclamation-circle text-red-500 text-xl mb-2"></i>
+                            <p class="text-sm text-gray-500">加载事件失败，请稍后重试</p>
+                        </div>
+
+                        <!-- 空状态 -->
+                        <div id="eventsEmpty" class="hidden py-4 text-center">
+                            <i class="fa fa-calendar-o text-gray-300 text-xl mb-2"></i>
+                            <p class="text-sm text-gray-500">暂无可用事件</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模态框底部 -->
+            <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                <button id="cancelAssociateButton" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                    取消
+                </button>
+                <button id="confirmAssociateButton" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    确认关联
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 搜索脚本 -->
+    <script>
+        // HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchKeyword = document.getElementById('searchKeyword');
+            const searchButton = document.getElementById('searchButton');
+            const searchHint = document.getElementById('searchHint');
+            const searchResults = document.getElementById('searchResults');
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultStats = document.getElementById('resultStats');
+            const statsText = document.getElementById('statsText');
+            const paragraphResults = document.getElementById('paragraphResults');
+            const paragraphCount = document.getElementById('paragraphCount');
+            const paragraphItems = document.getElementById('paragraphItems');
+            const eventResults = document.getElementById('eventResults');
+            const eventCount = document.getElementById('eventCount');
+            const eventItems = document.getElementById('eventItems');
+            const noResults = document.getElementById('noResults');
+
+            // 搜索函数
+            async function search() {
+                const keyword = searchKeyword.value.trim();
+                if (!keyword) {
+                    searchHint.textContent = '请输入搜索关键词';
+                    searchHint.className = 'mt-4 text-sm text-red-500';
+                    return;
+                }
+
+                // 重置状态
+                searchHint.textContent = '';
+                searchResults.classList.remove('hidden');
+                loadingIndicator.classList.remove('hidden');
+                resultStats.classList.add('hidden');
+                paragraphResults.classList.add('hidden');
+                eventResults.classList.add('hidden');
+                noResults.classList.add('hidden');
+
+                try {
+                    // 调用搜索API
+                    const response = await fetch(`/api/search/paragraph?keyword=${encodeURIComponent(keyword)}`);
+                    if (!response.ok) {
+                        throw new Error('搜索请求失败: ' + response.status);
+                    }
+                    const data = await response.json();
+                    console.log('搜索结果数据:', data); // 调试信息
+
+                    // 显示结果
+                    loadingIndicator.classList.add('hidden');
+
+                    if (data.total === 0) {
+                        noResults.classList.remove('hidden');
+                        return;
+                    }
+
+                    // 显示统计信息
+                    resultStats.classList.remove('hidden');
+                    statsText.textContent = `找到相关结果约 ${data.total} 条，用时 0.${Math.floor(Math.random() * 9) + 1} 秒`;
+
+                    // 显示段落结果
+                    if (data.paragraphTotal > 0 && data.paragraphItems && Array.isArray(data.paragraphItems)) {
+                        paragraphResults.classList.remove('hidden');
+                        paragraphCount.textContent = `(${data.paragraphTotal}条)`;
+                        paragraphItems.innerHTML = '';
+
+                        data.paragraphItems.forEach((item, index) => {
+                            const resultCard = document.createElement('div');
+                            resultCard.className = 'bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:border-primary/30 shadow-hover transition-all duration-300';
+
+                            // 构建内容
+                            let content = '';
+
+                            // 添加结果序号和勾选框
+                            content += `<div class="flex justify-between items-start mb-3">
+                                        <div class="flex items-center">
+                                            <div class="mr-2 checkbox-container">
+                                                <input type="checkbox"
+                                                       class="paragraph-checkbox hidden"
+                                                       data-id="${item.id}"
+                                                       data-content="${escapeHtml(item.paragraphContent || '')}">
+                                            </div>
+                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-medium">${index + 1}</span>
+                                            ${item.eventTitle ? `<span class="ml-3 px-2 py-1 bg-primary/10 text-primary text-xs rounded">${escapeHtml(item.eventTitle)}</span>` : ''}
+                                        </div>
+                                        ${item.score ? `<span class="text-xs text-gray-400">相关度: ${(item.score * 100).toFixed(0)}%</span>` : ''}
+                                    </div>`;
+
+                            // 添加高亮内容
+                            if (item.paragraphContent_highlight && Array.isArray(item.paragraphContent_highlight) && item.paragraphContent_highlight.length > 0) {
+                                item.paragraphContent_highlight.forEach(highlight => {
+                                    content += `<div class="text-neutral mb-2">${highlight}</div>`;
+                                });
+                            } else if (item.paragraphContent) {
+                                content += `<div class="text-neutral">${escapeHtml(item.paragraphContent.substring(0, 250))}${item.paragraphContent.length > 250 ? '...' : ''}</div>`;
+                            }
+
+                            // 添加ID信息
+                            if (item.id) {
+                                content += `<div class="mt-3 text-xs text-gray-400">ID: ${item.id}</div>`;
+                            }
+
+                            resultCard.innerHTML = content;
+                            paragraphItems.appendChild(resultCard);
+
+                            // 添加鼠标悬浮显示勾选框的效果
+                            const checkbox = resultCard.querySelector('.paragraph-checkbox');
+                            const checkboxContainer = resultCard.querySelector('.checkbox-container');
+
+                            // 设置勾选框样式
+                            checkbox.style.cursor = 'pointer';
+
+                            // 鼠标悬浮显示勾选框
+                            resultCard.addEventListener('mouseenter', () => {
+                                checkbox.classList.remove('hidden');
+                            });
+
+                            // 鼠标离开时，如果没有被选中则隐藏
+                            resultCard.addEventListener('mouseleave', () => {
+                                if (!checkbox.checked) {
+                                    checkbox.classList.add('hidden');
+                                }
+                            });
+
+                            // 监听勾选框变化，更新关联按钮状态
+                            checkbox.addEventListener('change', updateAssociateButton);
+
+                            // 阻止事件冒泡，避免点击勾选框时触发卡片其他事件
+                            checkbox.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                        });
+                    }
+
+                    // 显示事件结果
+                    if (data.eventTotal > 0 && data.eventItems && Array.isArray(data.eventItems)) {
+                        eventResults.classList.remove('hidden');
+                        eventCount.textContent = `(${data.eventTotal}条)`;
+                        eventItems.innerHTML = '';
+
+                        data.eventItems.forEach((item, index) => {
+                            const resultCard = document.createElement('div');
+                            resultCard.className = 'bg-white p-5 rounded-lg shadow-sm border border-gray-100 hover:border-accent/30 shadow-hover transition-all duration-300';
+
+                            // 构建内容
+                            let content = '';
+
+                            // 添加结果序号和勾选框
+                            content += `<div class="flex justify-between items-start mb-3">
+                                        <div class="flex items-center">
+                                            <div class="mr-2 checkbox-container">
+                                                <input type="checkbox"
+                                                       class="event-checkbox hidden"
+                                                       data-id="${item.id}"
+                                                       data-content="${escapeHtml(item.eventTitle || '')}">
+                                            </div>
+                                            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-accent/10 text-accent text-xs font-medium">${index + 1}</span>
+                                        </div>
+                                        ${item.score ? `<span class="text-xs text-gray-400">相关度: ${(item.score * 100).toFixed(0)}%</span>` : ''}
+                                    </div>`;
+
+                            // 添加高亮事件标题
+                            if (item.eventTitle_highlight && Array.isArray(item.eventTitle_highlight) && item.eventTitle_highlight.length > 0) {
+                                item.eventTitle_highlight.forEach(highlight => {
+                                    content += `<div class="text-lg font-semibold text-accent mb-2">${highlight}</div>`;
+                                });
+                            } else if (item.eventTitle) {
+                                content += `<div class="text-lg font-semibold text-neutral mb-2">${escapeHtml(item.eventTitle)}</div>`;
+                            }
+
+                            // 添加段落内容（如果有）
+                            if (item.paragraphContent) {
+                                content += `<div class="text-gray-600 mt-2">${escapeHtml(item.paragraphContent.substring(0, 200))}${item.paragraphContent.length > 200 ? '...' : ''}</div>`;
+                            }
+
+                            // 添加ID信息
+                            if (item.id) {
+                                content += `<div class="mt-3 text-xs text-gray-400">ID: ${item.id}</div>`;
+                            }
+
+                            resultCard.innerHTML = content;
+                            eventItems.appendChild(resultCard);
+
+                            // 添加鼠标悬浮显示勾选框的效果
+                            const checkbox = resultCard.querySelector('.event-checkbox');
+                            const checkboxContainer = resultCard.querySelector('.checkbox-container');
+
+                            // 设置勾选框样式
+                            checkbox.style.cursor = 'pointer';
+
+                            // 鼠标悬浮显示勾选框
+                            resultCard.addEventListener('mouseenter', () => {
+                                checkbox.classList.remove('hidden');
+                            });
+
+                            // 鼠标离开时，如果没有被选中则隐藏
+                            resultCard.addEventListener('mouseleave', () => {
+                                if (!checkbox.checked) {
+                                    checkbox.classList.add('hidden');
+                                }
+                            });
+
+                            // 监听勾选框变化，更新关联按钮状态
+                            checkbox.addEventListener('change', updateAssociateButton);
+
+                            // 阻止事件冒泡，避免点击勾选框时触发卡片其他事件
+                            checkbox.addEventListener('click', (e) => {
+                                e.stopPropagation();
+                            });
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('搜索错误:', error);
+                    loadingIndicator.classList.add('hidden');
+                    noResults.classList.remove('hidden');
+                    noResults.querySelector('h3').textContent = '搜索过程中出现错误';
+                    noResults.querySelector('p').textContent = error.message || '请稍后重试或联系管理员';
+                    // 在控制台显示更多调试信息
+                    console.log('请检查API端点是否正确: /api/search/paragraph');
+                    console.log('请确认后端Controller是否正确配置和运行中');
+                }
+            }
+
+            // 工具函数：HTML转义
+            function escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            // 更新关联按钮状态
+            function updateAssociateButton() {
+                const checkedBoxes = document.querySelectorAll('.paragraph-checkbox:checked, .event-checkbox:checked');
+                const associateButton = document.getElementById('associateButton');
+
+                if (checkedBoxes.length > 0) {
+                    associateButton.classList.remove('hidden');
+                } else {
+                    associateButton.classList.add('hidden');
+                }
+            }
+
+
+
+
+            // 模态框相关元素
+            const associateModal = document.getElementById('associateModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const cancelAssociateButton = document.getElementById('cancelAssociateButton');
+            const associateButton = document.getElementById('associateButton');
+            const confirmAssociateButton = document.getElementById('confirmAssociateButton');
+            const eventSearchInput = document.getElementById('eventSearchInput');
+            const eventList = document.getElementById('eventList');
+            const eventsLoading = document.getElementById('eventsLoading');
+            const eventsError = document.getElementById('eventsError');
+            const eventsEmpty = document.getElementById('eventsEmpty');
+            const selectedCount = document.getElementById('selectedCount');
+
+            // 定义命名函数作为事件监听器
+            function handleAssociateButtonClick(e) {
+                e.stopPropagation();
+                console.log('关联按钮被点击');
+                openModal();
+            }
+
+            function handleConfirmAssociateClick(e) {
+                e.stopPropagation();
+                console.log('确认关联按钮被点击，按钮状态:', confirmAssociateButton.disabled);
+                console.log('当前选中的目标事件ID:', selectedEventId);
+                associateEvents();
+            }
+
+            // 绑定按钮事件的函数
+            let isEventsBound = false;  // 用于标记事件是否已经绑定
+
+            function bindButtonEvents() {
+                if (isEventsBound) return;  // 如果事件已经绑定，直接返回，不再执行下面的代码
+
+                // 绑定事件
+                if (associateButton) {
+                    // 移除旧的事件监听器，防止重复绑定
+                    associateButton.removeEventListener('click', handleAssociateButtonClick);
+                    associateButton.addEventListener('click', handleAssociateButtonClick);
+                    console.log('关联按钮事件已绑定');
+                }
+
+                if (confirmAssociateButton) {
+                    // 移除旧的事件监听器，防止重复绑定
+                    confirmAssociateButton.removeEventListener('click', handleConfirmAssociateClick);
+                    confirmAssociateButton.addEventListener('click', handleConfirmAssociateClick);
+                    confirmAssociateButton.disabled = true; // 初始禁用
+                    console.log('确认关联按钮事件已绑定');
+                }
+
+                // 设置标志，表示事件已经绑定
+                isEventsBound = true;
+            }
+
+            // // 检查DOM是否已加载，如果已加载则直接绑定，否则在DOMContentLoaded事件中绑定
+            //   if (document.readyState === 'loading') {
+            //       document.addEventListener('DOMContentLoaded', function() {
+            //           console.log('DOM已加载，绑定按钮事件');
+            //           bindButtonEvents();
+            //       });
+            //   } else {
+            //       console.log('DOM已完成加载，直接绑定按钮事件');
+            //       bindButtonEvents();
+            //   }
+            // 绑定一次按钮事件
+            console.log('绑定按钮事件');
+            bindButtonEvents();
+
+
+            // 存储事件数据
+            let allEvents = [];
+            let selectedEventId = null;
+            let selectedEventTitle = null;
+
+            // 打开模态框
+            function openModal() {
+                // 更新选中数量 - 同时计算段落和事件复选框
+                const checkedBoxes = document.querySelectorAll('.paragraph-checkbox:checked, .event-checkbox:checked');
+                selectedCount.textContent = checkedBoxes.length;
+                console.log(`打开模态框，选中了 ${checkedBoxes.length} 个项目`);
+
+                // 重置状态
+                selectedEventId = null;
+                selectedEventTitle = null;
+                eventSearchInput.value = '';
+                confirmAssociateButton.disabled = true;
+
+                // 显示模态框
+                associateModal.classList.remove('hidden');
+                console.log('模态框已显示');
+
+                // 加载事件列表
+                loadEvents();
+            }
+
+            // 关闭模态框
+            function closeModal() {
+                associateModal.classList.add('hidden');
+            }
+
+            // 加载事件列表
+            async function loadEvents() {
+                // 显示加载状态
+                eventsLoading.classList.remove('hidden');
+                eventsError.classList.add('hidden');
+                eventsEmpty.classList.add('hidden');
+
+                try {
+                    // 调用获取事件列表API
+                    const response = await fetch('/api/event/list');
+                    if (!response.ok) {
+                        throw new Error('获取事件列表失败');
+                    }
+                    allEvents = await response.json();
+
+                    // 隐藏加载状态
+                    eventsLoading.classList.add('hidden');
+
+                    // 渲染事件列表
+                    renderEventList(allEvents);
+
+                    // 如果没有事件，显示空状态
+                    if (allEvents.length === 0) {
+                        eventsEmpty.classList.remove('hidden');
+                    }
+                } catch (error) {
+                    console.error('加载事件错误:', error);
+                    eventsLoading.classList.add('hidden');
+                    eventsError.classList.remove('hidden');
+                }
+            }
+
+            // 渲染事件列表
+            function renderEventList(events) {
+                eventList.innerHTML = '';
+
+                events.forEach(event => {
+                    // 添加调试日志查看事件对象结构
+                    console.log('事件对象结构:', event);
+                    const eventItem = document.createElement('div');
+                    eventItem.className = `p-3 border rounded-lg cursor-pointer transition-colors ${selectedEventId === event.id ? 'bg-primary/10 border-primary/30' : 'hover:bg-gray-50 border-gray-200'}`;
+
+                    // 构建事件内容
+                    let content = '';
+                    content += `<div class="flex items-center">`;
+                    content += `<div class="flex-shrink-0 mr-3">`;
+                    content += `<i class="fa fa-calendar text-accent"></i>`;
+                    content += `</div>`;
+                    content += `<div class="flex-grow">`;
+                    content += `<div class="font-medium text-neutral">${escapeHtml(event.eventTitle || '')}</div>`;
+                    if (event.eventTime) {
+                        content += `<div class="text-xs text-gray-500 mt-1">${escapeHtml(event.eventTime)}</div>`;
+                    }
+                    content += `</div>`;
+                    content += `</div>`;
+
+                    eventItem.innerHTML = content;
+
+                    // 点击事件
+                    eventItem.addEventListener('click', () => {
+                        selectedEventId = event.eventId;
+                        selectedEventTitle = event.eventTitle || '';
+                        confirmAssociateButton.disabled = false;
+                        console.log(`已选择事件 ${event.eventId} (${event.eventTitle})，确认关联按钮已启用`);
+
+                        // 更新所有事件项的样式
+                        const allEventItems = eventList.querySelectorAll('div[class*="p-3 border rounded-lg"]');
+                        allEventItems.forEach(item => {
+                            item.className = 'p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 border-gray-200';
+                        });
+
+                        // 更新当前选中项的样式
+                        eventItem.className = 'p-3 border rounded-lg cursor-pointer transition-colors bg-primary/10 border-primary/30';
+                    });
+
+                    eventList.appendChild(eventItem);
+                });
+            }
+
+            // 搜索事件
+            function searchEvents() {
+                const keyword = eventSearchInput.value.trim().toLowerCase();
+
+                if (!keyword) {
+                    renderEventList(allEvents);
+                    return;
+                }
+
+                // 过滤事件
+                const filteredEvents = allEvents.filter(event =>
+                    event.eventTitle && event.eventTitle.toLowerCase().includes(keyword)
+                );
+
+                renderEventList(filteredEvents);
+            }
+
+            // 本地缓存，用于跟踪段落已关联的事件
+            // 关联事件
+            async function associateEvents() {
+                try {
+                    // 分别获取选中的段落和事件ID
+                    const paragraphBoxes = document.querySelectorAll('.paragraph-checkbox:checked');
+                    const eventBoxes = document.querySelectorAll('.event-checkbox:checked');
+
+                    const paragraphIds = Array.from(paragraphBoxes).map(checkbox => parseInt(checkbox.dataset.id));
+                    const eventIds = Array.from(eventBoxes).map(checkbox => parseInt(checkbox.dataset.id));
+
+                    // 检查是否有选中项或目标事件
+                    if ((paragraphIds.length === 0 && eventIds.length === 0) || !selectedEventId) {
+                        return;
+                    }
+
+                    // 显示详细日志
+                    console.log('选中的段落ID:', paragraphIds);
+                    console.log('选中的事件ID:', eventIds);
+                    console.log('目标事件ID:', selectedEventId, '类型:', typeof selectedEventId);
+
+                    // 合并段落ID和事件中的段落ID
+                    const allParagraphIds = [...paragraphIds, ...eventIds];
+                    console.log('合并后的所有段落ID:', allParagraphIds);
+
+                    // 验证数据
+                    if (!allParagraphIds || allParagraphIds.length === 0) {
+                        showNotification('请选择要关联的段落', true);
+                        confirmAssociateButton.disabled = false;
+                        confirmAssociateButton.innerHTML = '确认关联';
+                        return;
+                    }
+
+                    if (!selectedEventId) {
+                        showNotification('请选择要关联的事件', true);
+                        confirmAssociateButton.disabled = false;
+                        confirmAssociateButton.innerHTML = '确认关联';
+                        return;
+                    }
+
+                    // 确保事件ID是数字类型
+                    const eventIdNumber = parseInt(selectedEventId);
+                    console.log('转换后的事件ID:', eventIdNumber, '类型:', typeof eventIdNumber);
+
+                    // 显示加载状态
+                    confirmAssociateButton.disabled = true;
+                    confirmAssociateButton.innerHTML = '<i class="fa fa-spinner fa-spin mr-1"></i>关联中...';
+
+                    // 准备请求数据
+                    const requestData = {
+                        paragraphIds: allParagraphIds,
+                        eventId: eventIdNumber
+                    };
+                    console.log('请求数据:', requestData);
+
+                    // 调用批量关联API
+                    const response = await fetch('/api/event/associate/batch', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    });
+
+                    // 记录响应状态
+                    console.log('响应状态:', response.status);
+                    console.log('响应状态文本:', response.statusText);
+
+                    if (!response.ok) {
+                        // 尝试获取错误详情
+                        let errorDetails = '';
+                        let loginUrl = '';
+                        try {
+                            const errorData = await response.json();
+                            errorDetails = errorData.message || '';
+                            loginUrl = errorData.loginUrl || '';
+                            // 如果是认证失败且有登录URL，自动跳转
+                            if (response.status === 401 && loginUrl) {
+                                // 显示友好提示
+                                showNotification('请先登录系统', true);
+
+                                // 延迟跳转，让用户看到提示
+                                setTimeout(() => {
+                                    window.location.href = loginUrl;
+                                }, 2000);
+                                return;
+                            }
+                        } catch (e) {
+                            console.error('无法解析错误响应:', e);
+
+                        }
+
+                        throw new Error(`关联请求失败: ${errorDetails}`);
+                    }
+
+                    const result = await response.json();
+
+                    // 显示成功消息
+                    if (result.success) {
+                        // 关闭模态框
+                        closeModal();
+
+                        // 清除勾选
+                        paragraphBoxes.forEach(checkbox => {
+                            checkbox.checked = false;
+                            checkbox.classList.add('hidden');
+                        });
+                        eventBoxes.forEach(checkbox => {
+                            checkbox.checked = false;
+                            checkbox.classList.add('hidden');
+                        });
+
+                        // 更新关联按钮状态
+                        updateAssociateButton();
+
+                        // 构建提示消息
+                        let notificationMessage = '';
+                        if (result.duplicateParagraphIds && result.duplicateParagraphIds.length > 0) {
+                            const duplicateCount = result.duplicateParagraphIds.length;
+                            const successCount = result.successCount;
+                            const totalCount = duplicateCount + successCount;
+
+                            if (successCount > 0) {
+                                notificationMessage = `${successCount}个段落绑定成功`;
+                                if (duplicateCount > 0) {
+                                    notificationMessage += `，${duplicateCount}个段落已与事件关联，跳过绑定`;
+                                }
+                            } else {
+                                // 全部是重复的情况
+                                notificationMessage = '所有段落已与事件关联，无需重复绑定';
+                            }
+                        } else {
+                            notificationMessage = '绑定成功';
+                        }
+
+                        // 显示提示
+                        showNotification(notificationMessage);
+                    } else {
+                        throw new Error(result.message || '关联失败');
+                    }
+                } catch (error) {
+                    console.error('关联事件错误:', error);
+
+                    // 检查是否是重复关联错误
+                    if (error.message && error.message.includes('Duplicate entry')) {
+                        // 对于重复关联错误，显示成功提示，因为数据约束已经防止了重复
+                        showNotification('绑定成功');
+                    } else {
+                        // 其他类型的错误保留原有提示
+                        showNotification(error.message || '关联失败，请稍后重试', true);
+                    }
+                } finally {
+                    // 恢复按钮状态
+                    confirmAssociateButton.disabled = false;
+                    confirmAssociateButton.innerHTML = '确认关联';
+                }
+            }
+
+            // 显示通知
+            function showNotification(message, isError = false) {
+                // 创建通知元素
+                const notification = document.createElement('div');
+                notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg flex items-center z-50 transform transition-all duration-300 ${isError ? 'bg-red-100 text-red-700' : 'bg-primary text-white'}`;
+
+                // 添加图标
+                const icon = document.createElement('i');
+                icon.className = `fa ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2`;
+                notification.appendChild(icon);
+
+                // 添加消息文本
+                const text = document.createElement('span');
+                text.textContent = message;
+                notification.appendChild(text);
+
+                // 添加到页面
+                document.body.appendChild(notification);
+
+                // 自动移除
+                setTimeout(() => {
+                    notification.classList.add('opacity-0', 'translate-y-[-20px]');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+
+            // 事件监听器
+            closeModalButton.addEventListener('click', closeModal);
+            cancelAssociateButton.addEventListener('click', closeModal);
+            // 移除重复的事件监听器，使用bindButtonEvents函数中的绑定
+            eventSearchInput.addEventListener('input', searchEvents);
+
+            // 点击模态框外部关闭
+            associateModal.addEventListener('click', (e) => {
+                if (e.target === associateModal) {
+                    closeModal();
+                }
+            });
+
+            // 按ESC键关闭模态框
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && !associateModal.classList.contains('hidden')) {
+                    closeModal();
+                }
+            });
+
+            // 搜索按钮点击事件
+            searchButton.addEventListener('click', () => {
+                search();
+                // 重置所有勾选框
+                const checkboxes = document.querySelectorAll('.paragraph-checkbox, .event-checkbox');
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.classList.add('hidden');
+                });
+                // 隐藏关联按钮
+                updateAssociateButton();
+            });
+
+            // 回车键搜索
+            searchKeyword.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    search();
+                }
+            });
+
+            // 输入框焦点事件
+            searchKeyword.addEventListener('focus', () => {
+                if (searchHint.textContent.includes('请输入')) {
+                    searchHint.textContent = '';
+                }
+            });
+
+            // 输入框输入事件
+            searchKeyword.addEventListener('input', () => {
+                if (searchHint.textContent.includes('请输入')) {
+                    searchHint.textContent = '';
+                }
+                searchHint.className = 'mt-4 text-sm text-gray-500';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3000年中西历法对照 - 年历 - 历史范儿 - 让历史更有范</title>
+    <meta name="keywords" content="3000年中西历法对照,年历,历史范儿,让历史更有范,历史">
+    <meta name="description" content="3000年中西历法对照,年历,历史范儿,让历史更有范,历史">
+    <link rel="stylesheet" href="nianli.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+</head>
+
+<body>
+    <div class="top_bar"></div>
+    <div class="logo">
+        <div>
+            <img src="./images/nianli-logo.png" alt="nianli-logo" height="100px">
+            <div class="beta">BETA</div>
+        </div>
+        <img src="./images/3000y.png" alt="三千年中西历法对照" height="30px">
+    </div>
+    <div class="menu">
+        <span id="menu_list"><i class="bi bi-list"></i></span>
+        <ul class="menu_item">
+            <li><i class="bi bi-house"></i>年历首页</li>
+            <li><i class="bi bi-table"></i>表</li>
+            <li><i class="bi bi-question-circle"></i>帮助</li>
+        </ul>
+        <div class="search">
+            <div class="year">
+                <input type="text" name="search_year" placeholder="干支年/公历年，如甲子或2025">
+                <button id="search_year_button"><i class="bi bi-search"></i></button>
+            </div>
+            <div class="advanced_search">
+                <i class="bi bi-filter-circle"></i>
+                <span>高级搜索</span>
+            </div>
+        </div>
+    </div>
+    <div class="content">
+        <!-- 数据区 -->
+        <br>
+        <br>
+        <img src="./images/demo.png" alt="本图删掉">
+
+        <div class="tips">
+            <span>提示</span>
+            <div>
+                <ul>
+                    <li>域名：nianli.lishi.fan</li>
+                    <li>数据来自网络，本系统不作任何形式的保证。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        <div class="footer_info">
+            <div class="footer_logo">
+                <img src="images/logo.png" alt="footer-logo">
+            </div>
+            <div class="category">
+                <div class="books">
+                    <i class="bi bi-journals"></i>
+                    <div>
+                        <a href="#">史料</a>
+                        <span>阅读史料新方式</span>
+                    </div>
+
+                    <span>开发中</span>
+                </div>
+                <div class="events">
+                    <i class="bi bi-link"></i>
+                    <div>
+                        <a href="#">事件</a>
+                        <span>以事件为纲关联史料</span>
+                    </div>
+                    <span>开发中</span>
+                </div>
+                <div class="people">
+                    <i class="bi bi-people-fill"></i>
+                    <div>
+                        <a href="#">人物</a>
+                        <span>历史人物关系网</span>
+                    </div>
+                    <span>开发中</span>
+                </div>
+                <div class="search">
+                    <i class="bi bi-search"></i>
+                    <div>
+                        <a href="#">搜索</a>
+                        <span>史料全能搜索</span>
+                    </div>
+                    <span>开发中</span>
+                </div>
+            </div>
+            <div class="help_link">
+                <span>快速链接</span>
+                <a href="#">
+                    <i class="bi bi-question-circle"></i>
+                    <span>使用文档</span>
+                </a>
+                <a href="#">
+                    <i class="bi bi-list-check"></i>
+                    <span>更新日志</span>
+                </a>
+                <a href="#">
+                    <i class="bi bi-postcard-heart"></i>
+                    <span>参考与致谢</span>
+                </a>
+                <a href="#">
+                    <i class="bi bi-at"></i>
+                    <span>关于我们</span>
+                </a>
+            </div>
+        </div>
+        <div class="copyright">皖ICP备10206328号-12&nbsp;&nbsp;Copyright &copy; since 2025 lishi.fan&nbsp;&nbsp;All Right
+            Reserved!</div>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var trigger = document.getElementById('menu_list');
+        var menu = document.querySelector('.menu_item');
+        // if (menu) menu.style.display = 'none';
+        trigger.addEventListener('click', function () {
+            if (!menu) return;
+            menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'flex' : 'none';
+        });
+    });
+    </script>
+</body>
+
+</html>

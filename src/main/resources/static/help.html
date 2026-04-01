@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用帮助 - 智能搜索系统</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 本地 Font Awesome -->
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CBCB',
+                        accent: '#FF7D00',
+                        neutral: '#1D2129',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+    <!-- 导航栏 -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-search text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-neutral">智能搜索系统</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="search.html" class="text-neutral hover:text-primary transition-all-300">搜索</a></li>
+                    <li><a href="help.html" class="text-primary font-medium border-b-2 border-primary pb-1">帮助</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <div class="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-bold text-neutral">使用帮助</h2>
+                <span class="bg-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full">Beta 测试版</span>
+            </div>
+            
+            <!-- 测试版本说明 -->
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-4 mb-6 rounded-r">
+                <div class="flex items-start">
+                    <i class="fa fa-exclamation-triangle text-orange-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-semibold text-orange-800 mb-1">测试版本说明</h3>
+                        <p class="text-orange-700 text-sm">
+                            当前系统为测试版本（Beta），可能存在功能不完善或性能不稳定的情况。
+                            我们正在持续优化和改进系统功能，感谢您的理解和支持。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+
+                <!-- 搜索指南 -->
+                <section>
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-search mr-2"></i>
+                        搜索指南
+                    </h3>
+                    <div class="space-y-4 text-gray-700">
+                        <p>本系统提供高效的全文搜索功能，支持两种主要搜索模式：</p>
+                        <ul class="list-disc list-inside pl-4 space-y-2">
+                            <li><strong class="text-neutral">段落内容搜索</strong> - 搜索关键词出现在段落正文中的内容</li>
+                            <li><strong class="text-neutral">事件标题搜索</strong> - 搜索关键词出现在事件标题中的内容</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <!-- 如何使用 -->
+                <section>
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-question-circle mr-2"></i>
+                        如何使用
+                    </h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+                            <ol class="list-decimal list-inside space-y-3">
+                                <li>在搜索页面的搜索框中输入您想要查找的关键词</li>
+                                <li>点击搜索按钮或按回车键开始搜索</li>
+                                <li>搜索结果将分为段落内容和事件标题两部分显示</li>
+                                <li>匹配的关键词会以高亮（黄色背景）的形式显示</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 搜索技巧 -->
+                <section>
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-lightbulb-o mr-2"></i>
+                        搜索技巧
+                    </h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-neutral mb-2">关键词选择技巧</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-2">
+                                <li>使用具体、精确的关键词可以获得更准确的结果</li>
+                                <li>避免使用过于通用的词汇，如“的”、“是”等常见词</li>
+                                <li>对于专有名词，请使用标准写法</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 border border-gray-200 rounded-lg">
+                            <h4 class="font-semibold text-neutral mb-2">结果解读</h4>
+                            <ul class="list-disc list-inside pl-4 space-y-2">
+                                <li>搜索结果按相关性排序，最相关的内容排在前面</li>
+                                <li>每个结果下方显示相关度百分比，数值越高表示相关性越强</li>
+                                <li>段落结果会显示匹配的文本片段，方便快速预览</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 常见问题 -->
+                <section>
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-info-circle mr-2"></i>
+                        常见问题
+                    </h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="border-b border-gray-100 pb-4">
+                            <h4 class="font-semibold text-neutral mb-1">为什么我的搜索没有结果？</h4>
+                            <p class="text-gray-600">可能是因为您的关键词过于特殊，或者系统中还没有相关数据。请尝试使用更通用的关键词，或者检查关键词的拼写是否正确。当前系统仅包含资治通鉴部分章节内容，尚属内部测试</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-4">
+                            <h4 class="font-semibold text-neutral mb-1">搜索结果中的高亮部分是什么？</h4>
+                            <p class="text-gray-600">高亮显示的部分是您搜索的关键词在文本中的位置，黄色背景使它们更容易被识别。</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-4">
+                            <h4 class="font-semibold text-neutral mb-1">如何提高搜索结果的准确性？</h4>
+                            <p class="text-gray-600">使用更具体、更精确的关键词，避免模糊不清的描述。系统会自动对中文进行分词处理，您不需要手动分词。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 免责声明 -->
+                <section>
+                    <h3 class="text-xl font-semibold text-primary mb-4 flex items-center">
+                        <i class="fa fa-shield mr-2"></i>
+                        免责声明
+                    </h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r">
+                            <div class="flex items-start">
+                                <i class="fa fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-semibold text-red-800 mb-2">重要提示</h4>
+                                    <ul class="list-disc list-inside pl-4 space-y-2 text-red-700 text-sm">
+                                        <li>本系统为测试版本，仅供内部测试使用</li>
+                                        <li>系统功能可能随时调整或更新</li>
+                                        <li>搜索结果仅供参考</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 返回搜索页面 -->
+                <div class="text-center pt-4">
+                    <a href="search.html" class="inline-flex items-center text-primary hover:text-primary/80 transition-all-300">
+                        <i class="fa fa-arrow-left mr-2"></i>
+                        返回搜索页面
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© 2025 智能搜索系统 - 基于 Elasticsearch 构建</p>
+        </div>
+    </footer>
+</body>
+</html>

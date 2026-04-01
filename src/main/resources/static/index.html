@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能搜索系统 - 首页</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+<!--     <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">-->
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+    <script>
+        // Tailwind 配置
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CBCB',
+                        accent: '#FF7D00',
+                        neutral: '#1D2129',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-balance {
+                text-wrap: balance;
+            }
+            .bg-gradient-hero {
+                background: linear-gradient(135deg, #165DFF 0%, #36CBCB 100%);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- 导航栏 -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-search text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-neutral">智能搜索系统</h1>
+            </div>
+            <nav>
+                <ul class="flex space-x-6">
+                    <li><a href="index.html" class="text-primary font-medium border-b-2 border-primary pb-1">首页</a></li>
+                    <li><a href="search.html" class="text-neutral hover:text-primary transition-all-300">搜索</a></li>
+                    <li><a href="help.html" class="text-neutral hover:text-primary transition-all-300">帮助</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要内容区 -->
+    <main class="flex-grow">
+        <!-- 英雄区域 -->
+        <section class="bg-gradient-hero text-white py-20">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-4 leading-tight">
+                    高效精准的全文搜索
+                </h1>
+                <p class="text-xl text-white/90 max-w-2xl mx-auto mb-8">
+                    基于Elasticsearch的智能搜索系统，快速定位段落和事件信息
+                </p>
+                <a href="search.html" class="inline-block bg-white text-primary font-medium px-8 py-4 rounded-lg shadow-lg hover:shadow-xl transition-all-300 transform hover:-translate-y-1">
+                    <i class="fa fa-search mr-2"></i>
+                    开始搜索
+                </a>
+            </div>
+        </section>
+
+        <!-- 功能特点 -->
+        <section class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-3xl font-bold text-neutral text-center mb-12">核心功能</h2>
+                <div class="grid md:grid-cols-3 gap-8">
+                    <!-- 功能卡片 1 -->
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-all-300 text-center">
+                        <div class="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-file-text-o text-primary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-neutral mb-2">段落搜索</h3>
+                        <p class="text-gray-600">精准搜索段落内容，高亮显示匹配关键词，快速定位所需信息。</p>
+                    </div>
+
+                    <!-- 功能卡片 2 -->
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-all-300 text-center">
+                        <div class="bg-accent/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-calendar text-accent text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-neutral mb-2">事件搜索</h3>
+                        <p class="text-gray-600">按事件标题进行搜索，快速找到相关历史事件或重要信息点。</p>
+                    </div>
+
+                    <!-- 功能卡片 3 -->
+                    <div class="bg-gray-50 p-6 rounded-lg shadow-sm hover:shadow-md transition-all-300 text-center">
+                        <div class="bg-secondary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fa fa-bolt text-secondary text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-neutral mb-2">高效排序</h3>
+                        <p class="text-gray-600">基于相关性算法智能排序，确保最相关的结果优先显示。</p>
+                    </div>
+                    </grid>
+                </div>
+        </section>
+
+        <!-- 快速开始区域 -->
+        <section class="py-16 bg-gray-50">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold text-neutral mb-4">立即体验智能搜索</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto mb-8">
+                    点击下方按钮，开始您的搜索之旅，发现更多精彩内容
+                </p>
+                <a href="search.html" class="inline-block bg-primary text-white font-medium px-8 py-3 rounded-lg shadow-md hover:bg-primary/90 transition-all-300">
+                    前往搜索页面
+                    <i class="fa fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200 py-6">
+        <div class="container mx-auto px-4 text-center text-gray-500 text-sm">
+            <p>© 2025 智能搜索系统 - 基于Elasticsearch构建</p>
+        </div>
+    </footer>
+</body>
+</html>

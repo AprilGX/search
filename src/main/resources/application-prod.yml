@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/read_history_wisely?useSSL=false&serverTimezone=Asia/Shanghai
+    username: 'O&M'
+    password: 'O&M123456'
+  redis:
+    host: localhost
+    port: 6379
+    password: redis12123 # 线上 Redis 密码
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 10
+        max-idle: 10
+        min-idle: 1
+
+# SSO服务器配置 - 生产环境
+sso:
+  server:
+    url: http://weekly.hm.ylh.pub  # SSO认证中心地址
+  # 应用域名配置 - 生产环境
+  app:
+    domain: http://weekly.search.ylh.pub  # 当前应用域名
+reading:
+  app:
+    domain: http://weekly.hm.ylh.pub/edit.html
