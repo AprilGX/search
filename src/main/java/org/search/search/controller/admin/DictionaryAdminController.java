@@ -47,11 +47,11 @@ public class DictionaryAdminController {
         Boolean enabled = body.get("enabled");
         if (enabled == null) enabled = true;
         
-        redisTemplate.opsForValue().set(DICT_MERGE_CONFIG_KEY, String.valueOf(enabled));
+        //  redisTemplate.opsForValue().set(DICT_MERGE_CONFIG_KEY, String.valueOf(enabled));
         
         // 开关变了，同义词文件内容也会变，必须强制刷新时间戳，触发重新生成
         long now = System.currentTimeMillis();
-        redisTemplate.opsForValue().set(DICT_SYNONYM_LAST_MODIFIED_KEY, String.valueOf(now));
+       // redisTemplate.opsForValue().set(DICT_SYNONYM_LAST_MODIFIED_KEY, String.valueOf(now));
         
         return Map.of("code", 200, "message", "设置成功，正在重新生成词典...");
     }

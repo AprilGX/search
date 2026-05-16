@@ -1,5 +1,9 @@
 package org.search.search.service.impl;
 
+import org.elasticsearch.action.admin.indices.close.CloseIndexRequest;
+import org.elasticsearch.action.admin.indices.open.OpenIndexRequest;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +43,7 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
     private final StringRedisTemplate redisTemplate;
     private final DeepSeekService deepSeekService;
     private final ObjectMapper objectMapper;
-
+    private final RestHighLevelClient restHighLevelClient;
     private static final String SEARCH_HOT_WORD_KEY = "search:hot:words";
     // 拆分后的 Redis Key
     private static final String DICT_HOTWORD_LAST_MODIFIED_KEY = "dict:hotword:last:modified";
@@ -224,6 +228,8 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
             if (!synonymsContent.isEmpty()) {
                 writeToFile("synonyms.txt", synonymsContent);
                 this.lastSynonymSyncTimestamp = remoteSynonymTime;
+
+                reloadElasticsearchIndex("tb_paragraph");
             }
         }
     }
@@ -337,19 +343,35 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
      * 输出: A,B,C
      */
     private String buildMergedSynonyms(List<DictionaryStore> list) {
+        // --- 新增：输出原始对象列表状态 ---
+        System.out.println("==== 同义词合并任务开始 ====");
+        if (list == null || list.isEmpty()) {
+            System.out.println("警告：输入的对象列表 list 为空或 null");
+        } else {
+            System.out.println("当前待处理对象总数: " + list.size());
+            for (int i = 0; i < list.size(); i++) {
+                DictionaryStore item = list.get(i);
+                System.out.printf("对象[%d]: ID=%s, 规则原文=[%s]%n",
+                        i, item.getId(), item.getSynonymRule());
+            }
+        }
+        // ------------------------------
+
         // 1. 构建邻接表
         java.util.Map<String, Set<String>> graph = new java.util.HashMap<>();
         for (DictionaryStore item : list) {
             String rule = item.getSynonymRule();
             if (rule == null || rule.trim().isEmpty()) continue;
-            
+
             // 只处理逗号分隔的等价规则，跳过 "=>" 映射规则
             if (rule.contains("=>")) {
-                // 映射规则无法简单合并，直接保留原样（暂不参与图构建，或单独处理）
-                continue; 
+                System.out.println("检测到映射规则（跳过图构建）: " + rule.trim());
+                continue;
             }
 
             String[] words = rule.split("[,，]");
+            System.out.println("正在处理等价规则分词: " + java.util.Arrays.toString(words));
+
             for (int i = 0; i < words.length; i++) {
                 String w1 = words[i].trim();
                 for (int j = i + 1; j < words.length; j++) {
@@ -362,10 +384,12 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
             }
         }
 
+        System.out.println("邻接表构建完成，节点总数: " + graph.size());
+
         // 2. 寻找连通分量 (BFS)
         StringBuilder sb = new StringBuilder();
         Set<String> visited = new java.util.HashSet<>();
-        
+
         // 先把刚才跳过的 "=>" 规则原文加进去
         for (DictionaryStore item : list) {
             if (item.getSynonymRule() != null && item.getSynonymRule().contains("=>")) {
@@ -376,7 +400,7 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
         for (String node : graph.keySet()) {
             if (visited.contains(node)) continue;
 
-            Set<String> component = new java.util.LinkedHashSet<>(); // 保持顺序纯粹为了美观
+            Set<String> component = new java.util.LinkedHashSet<>();
             java.util.Queue<String> queue = new java.util.LinkedList<>();
             queue.add(node);
             visited.add(node);
@@ -395,10 +419,37 @@ public class DictionaryMiningServiceImpl implements DictionaryMiningService {
 
             // 输出这一组连通词
             if (component.size() > 1) {
-                sb.append(String.join(", ", component)).append("\n");
+                String mergedResult = String.join(", ", component);
+                System.out.println("成功合并连通组: " + mergedResult);
+                sb.append(mergedResult).append("\n");
             }
         }
-        
-        return sb.toString();
+
+        String finalContent = sb.toString();
+        System.out.println("==== 同义词合并任务结束，最终输出内容预览 ====");
+        System.out.println(finalContent);
+        System.out.println("==========================================");
+
+        return finalContent;
+    }
+    /**
+     * 利用 RestHighLevelClient 瞬间重载索引词典，实现无感热更新
+     */
+    private void reloadElasticsearchIndex(String indexName) {
+        try {
+            log.info("正在重启 ES 索引 [{}] 以加载最新同义词词典...", indexName);
+
+            // 1. 关闭索引
+            CloseIndexRequest closeRequest = new CloseIndexRequest(indexName);
+            restHighLevelClient.indices().close(closeRequest, RequestOptions.DEFAULT);
+
+            // 2. 打开索引
+            OpenIndexRequest openRequest = new OpenIndexRequest(indexName);
+            restHighLevelClient.indices().open(openRequest, RequestOptions.DEFAULT);
+
+            log.info("ES 索引 [{}] 重载完成，最新同义词已生效！", indexName);
+        } catch (Exception e) {
+            log.error("重启 ES 索引失败", e);
+        }
     }
 }
